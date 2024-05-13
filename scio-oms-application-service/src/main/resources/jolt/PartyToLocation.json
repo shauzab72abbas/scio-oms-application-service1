@@ -1,0 +1,19 @@
+[
+  {
+    "operation": "remove",
+    "spec": {
+      "address": {
+        "customer": ""
+      }
+    }
+  },
+  {
+    "operation": "shift",
+    "spec": {
+      "address": {
+        "*": "&"
+      },
+      "*": "customer.&"
+    }
+  }
+]

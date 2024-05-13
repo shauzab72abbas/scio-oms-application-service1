@@ -1,0 +1,3579 @@
+openapi: 3.0.3
+info:
+  title: Order Application Service
+  description: "This is API request to manage orders"
+  version: 1.0.0
+
+  # API Gateway only.
+  # If you are designing a microservices interface, remove the command below.
+  termsOfService: http://api.cn.ca/terms
+  ###
+
+  # API Gateway only.
+  # If you are designing a microservices interface, remove the section below.
+  contact:
+    name: CN API Support
+    url: http://api.cn.ca/support
+    email: support@cn.ca
+###
+security:
+  - bearerAuth: []
+
+
+servers:
+  #Microservices Prod endpoint
+  - url: https://mtl-apimgmt14p.cn.ca:7513
+  - url: https://mtl-apimgmt15p.cn.ca:7513
+    description: Microservices prod endpoints
+  #API Gateway non-Prod endpoint
+  - url: https://cnr-nonprod-sbx.apigee.net
+    description: dev server
+  #API Gateway Prod endpoint
+  - url: https://api.cn.ca
+  - url: https://cnr-prod-prd.apigee.net
+    description: prod server
+
+paths:
+  /v1/orders:
+    post:
+      tags:
+        - Create Order
+      #summary: Request create order
+      operationId: createOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userInfo
+          in: header
+          description: Header for capturing user info
+          required: false
+          schema:
+            type: string
+        - name: langKey
+          in: header
+          description: Header for capturing langKey
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: Create Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+  /v1/orders/search:
+    post:
+      tags:
+        - Search orders
+      #summary: Search for orders based on conditions
+      operationId: searchOrders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: langKey
+          in: header
+          description: Header for capturing langKey
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: search order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrdersSearchRequest'
+
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+
+  /v1/orders/{orderId}/cancellation:
+    put:
+      tags:
+        - Cancel Order
+      operationId: cancelOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        description: Discard Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+  /v1/orders/{orderId}/order-item/{itemRequestId}/cancellation:
+    put:
+      tags:
+        - Cancel Partial Order
+      operationId: cancelPartialOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+
+        - name: itemRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Cancel Partial Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+
+  /v1/orders/{orderId}:
+    put:
+      tags:
+        - Update Order
+      #summary: Request to update order
+      operationId: updateOrder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: langKey
+          in: header
+          description: Header for capturing langKey
+          required: false
+          schema:
+            type: string
+        - name: userInfo
+          in: header
+          description: Header for capturing user info
+          required: false
+          schema:
+            type: string
+      requestBody:
+        description: Update Order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+    delete:
+      tags:
+        - Discard Draft and In Error
+      operationId: discard Order Request
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: Ok
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Success
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+    get:
+      tags:
+        - Get order by id
+      #summary: Request Order Information
+      operationId: getOrderById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: langKey
+          in: query
+          description: Header for capturing langKey
+          required: false
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+  /v1/order-equipment-requests/{orderEquipmentRequestId}/status-events:
+    put:
+      tags:
+        - update order event
+      #summary: update status
+      operationId: updateOrderEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderEquipmentRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: update status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/orderStatusModel'
+
+      responses:
+        200:
+          description: Ok
+          content:
+            test/plain:
+              schema:
+                type: string
+                example: Success
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+  /v1/ramps:
+    get:
+      tags:
+        - Get ramps for customer at location
+      operationId: getRamps
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: customerNumber
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: customerLocationSequenceNumber
+          in: query
+          required: true
+          schema:
+            type: number
+
+      responses:
+        200:
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Facility'
+          headers:
+            facilityAltName:
+              schema:
+                type: String
+                example: "ABBHCTYA"
+                description: Primary Ramp Among Ramps.
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse404'
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+  /v1/order-shipment-requests/{transportShipmentRequestId}/status-events:
+    put:
+      tags:
+        - update order event
+      #summary: update status
+      operationId: updateShipmentEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: transportShipmentRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: update status
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransportShipmentStatusModel'
+
+      responses:
+        200:
+          description: Ok
+          content:
+            test/plain:
+              schema:
+                type: string
+                example: Success
+
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse400'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse401'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse403'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse500'
+
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+  schemas:
+
+    CustomerFilterPayload:
+      type: object
+      properties:
+        customerNumber:
+          type: string
+        sequenceNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SequenceNumber'
+
+    SequenceNumber:
+      type: object
+      properties:
+        locationSequenceNumber:
+          type: string
+        includeLocationProfile:
+          type: boolean
+
+    OrdersSearchRequest:
+      type: object
+      properties:
+        includeStatusSummary:
+          type: boolean
+          example: true
+        includeDistinctValues:
+          type: boolean
+          example: true
+        includeNonMatchedSearchStrings:
+          type: boolean
+          example: true
+        searchCriteria:
+          $ref: '#/components/schemas/SearchCriteria'
+        sort:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sort'
+        pageNumber:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          example: 2
+        pageSize:
+          type: integer
+          minimum: 5
+          maximum: 100
+          example: 50
+
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+          enum:
+            - CREATE_DATE_TIME
+            - ORDER_NUMBER
+            - ORDER_REFERENCE_NUMBER
+            - EQUIPMENT_QTY
+        order:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          example: ASC
+
+    SearchCriteria:
+      type: object
+      properties:
+        orderingPartyId:
+          type: string
+          pattern: '^\d{6}$'
+          example: "921165"
+        date:
+          type: object
+          properties:
+            dateType:
+              type: string
+              enum:
+                - CREATE_DATE_TIME
+                - APPOINTMENT_DATE_TIME
+              default: CREATE_DATE_TIME
+            fromDate:
+              type: timestamp
+              example: "2020-04-14T10:00:00.000"
+            toDate:
+              type: timestamp
+              example: "2020-04-14T11:00:00.000"
+            timeZone:
+              type: String
+              example: "Asia/Kolkata"
+        partyRole:
+          type: array
+          items:
+            type: string
+            enum:
+              - Shipper
+              - PayerOfFreight
+              - ShipFrom
+              - OrderingParty
+              - Consignee
+              - ShipTo
+        payorOfFreight:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            example: "G35HBHELedzCx0t7Rq9Z"
+        shipFrom:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            example: "67634673efefhdjh"
+        orderLocations:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            example: "hjdhfuey45487fhd"
+        destinations:
+          type: array
+          items:
+            type: string
+            example: "58734ehwjfhejffb"
+        orderStatuses:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/Status'
+        searchStrings:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+            example: "Walmart"
+        searchBy:
+          type: string
+          example: CN_REFERENCE_NUMBER
+          enum:
+            - CN_REFERENCE_NUMBER
+            - CUSTOMER_REFERENCE_NUMBER
+            - EQUIPMENT_ID
+
+    FacilitySearch:
+      type: object
+      properties:
+        srcFacilityNumber:
+          type: integer
+          example: 2323
+        state:
+          $ref: '#/components/schemas/State'
+        city:
+          type: string
+        facilityNumber:
+          type: string
+          example: "19845"
+        facilityType:
+          type: string
+          enum:
+            - Terminal
+            - Port
+            - Station
+
+    Order:
+      type: object
+      required:
+        - orderType
+        - deliveryType
+        - materialType
+        - isInterlineMove
+        - isCnEmptyContainer
+        - orderingParty
+      properties:
+        orderId:
+          type: string
+          example: "G35HBHELedzCx0t7Rq9Z"
+        orderNumber:
+          type: string
+          example: 123456789
+        orderStatus:
+          $ref: '#/components/schemas/Status'
+
+        orderType:
+          type: string
+          example: ORDER
+          enum:
+            - ORDER
+            - PATTERN
+            - ORDER_REQUEST
+        orderProductService:
+          type: string
+          example: DOOR_TO_DOOR
+          enum:
+            - RAMP_TO_RAMP
+            - RAMP_TO_DOOR
+            - DOOR_TO_RAMP
+            - DOOR_TO_DOOR
+        orderProductServiceCode:
+          type: string
+
+
+        deliveryType:
+          type: string
+          example: DOMESTIC
+          enum:
+            - DOMESTIC
+            - TRANSBORDER
+        materialType:
+          type: string
+          example: NON_HAZARDOUS
+          enum:
+            - HAZARDOUS
+            - NON_HAZARDOUS
+            - MIXED
+        isInterlineMove:
+          type: boolean
+          example: false
+          default: false
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        sourceCreateSystem:
+          type: string
+          example: "OLDORDER"
+        sourceUpdateSystem:
+          type: string
+          example: "NEWORDER"
+        createdBy:
+          type: string
+          example: "OLDORDER"
+        updatedBy:
+          type: string
+          example: "NEWORDER"
+        orderingParty:
+          $ref: '#/components/schemas/OrderingParty'
+        shipper:
+          $ref: '#/components/schemas/Party'
+        shipFrom:
+          $ref: '#/components/schemas/Location'
+        payerOfFreight:
+          $ref: '#/components/schemas/CustomerAccount'
+        customerOrder:
+          $ref: '#/components/schemas/CustomerOrder'
+        orderNotification:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        orderLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLog'
+        orderError:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRuleError'
+
+    Notification:
+      type: object
+      required:
+        - notificationTrigger
+      properties:
+        notificationType:
+          type: string
+          example: "EMAIL"
+          enum:
+            - EMAIL
+            - PHONE
+        notificationTrigger:
+          type: string
+          example: SUBMITTED
+          enum:
+            - SUBMITTED
+            - ACCEPTED
+            - DECLINED
+            - SUBSTITUTED
+            - COMPLETED
+            - DRAFT
+            - IN_ERROR_NOT_SUBMITTED
+            - SEE_DETAILS
+            - CANCELLED
+            - EXECUTING
+            - ASSIGNED
+            - INTRANSIT
+            - RELEASED
+            - SAVED
+
+    CustomerOrder:
+      type: object
+      required:
+        - versionKey
+      properties:
+        customerOrderId:
+          type: string
+          example: "C20HBHELedzCx0t7Rq9Z"
+        versionKey:
+          type: integer
+          format: int32
+          example: 1
+        customerOrderStatus:
+          $ref: '#/components/schemas/Status'
+
+        orderUniqueReference:
+          type: string
+          example: "ABCD12345"
+        currentVersion:
+          type: boolean
+          example: true
+        comment:
+          type: string
+          example: "Deliver container"
+        orderError:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRuleError'
+        orderLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLog'
+        orderEquipmentRequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmptyDelivery'
+        orderShipmentRequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderShipmentRequest'
+
+    BusinessRuleError:
+      type: object
+      properties:
+        orderErrorId:
+          type: string
+        errorId:
+          type: string
+          example: "E539"
+        errorType:
+          type: string
+          example: "ShipmentID Missing"
+        ruleConfigId:
+          type: string
+          example: "B106"
+        ruleCategory:
+          type: string
+          example: "Payer of Freight"
+        createdTimestamp:
+          type: string
+          format: timestamp
+          example: "2020-04-14T10:45:07.719"
+
+
+    OrderLog:
+      type: object
+      properties:
+        orderLogId:
+          type: string
+        processId:
+          type: string
+          example: "P157"
+        processName:
+          type: string
+          example: OPERATIONAL
+          enum:
+            - OPERATIONAL
+        logDateTime:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        logType:
+          type: string
+        ruleConfigId:
+          type: string
+        currentStatus:
+          $ref: '#/components/schemas/Status'
+        previousStatus:
+          $ref: '#/components/schemas/Status'
+        createdTimestamp:
+          type: string
+          format: timestamp
+          example: "2020-04-14T10:45:07.719"
+
+    Cancellation:
+      type: object
+      properties:
+        cancellationReasonCode:
+          type: string
+          example: "T1584"
+        cancellationReasonDesc:
+          type: string
+          example: "Expected delivery time is too long"
+        cancellationTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        cancelledBy:
+          type: string
+          example: "Hemanth"
+        cancellationComment:
+          type: string
+
+    OrderEquipmentRequest:
+      type: object
+      properties:
+        orderEquipmentRequestId:
+          type: string
+          example: "G35HBHELedzCx0t7Rq9Z"
+        srcGeneratedId:
+          type: string
+          example: 123456777775
+        srcOrderConfirmationNumber:
+          type: string
+        isModified:
+          type: boolean
+          example: false
+          default: false
+        orderEquipmentRequestNumber:
+          type: string
+          example: 123456789
+        uiEquipmentId:
+          type: string
+          example: "G35HBHELedzCx0t7Rq9Z"
+        equipmentOwner:
+          $ref: '#/components/schemas/EquipmentOwnerCode'
+        equipmentOwnerDesc:
+          type: string
+        equipmentType:
+          $ref: '#/components/schemas/EquipmentTypeCode'
+        equipmentTypeDesc:
+          type: string
+        equipmentId:
+          type: string
+        allocatedEquipmentOwner:
+          $ref: '#/components/schemas/EquipmentOwnerCode'
+        allocatedEquipmentOwnerDesc:
+          type: string
+        allocatedEquipmentType:
+          $ref: '#/components/schemas/EquipmentTypeCode'
+        allocatedEquipmentTypeDesc:
+          type: string
+        usedEquipmentOwner:
+          $ref: '#/components/schemas/EquipmentOwnerCode'
+        usedEquipmentOwnerDesc:
+          type: string
+        usedEquipmentType:
+          $ref: '#/components/schemas/EquipmentTypeCode'
+        usedEquipmentTypeDesc:
+          type: string
+        requestCreationTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        equipmentOperationType:
+          type: string
+          example: DELIVERY
+          enum:
+            - DELIVERY
+            - PICKUP
+        guaranteeEquipmentProgram:
+          type: boolean
+          example: true
+        destination:
+          $ref: '#/components/schemas/Location'
+        status:
+          $ref: '#/components/schemas/Status'
+        requestedAtDestinationTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        orderError:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRuleError'
+        orderLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLog'
+        cancellation:
+          $ref: '#/components/schemas/Cancellation'
+        temperature:
+          type: number
+          example: 30
+        temperatureUnit:
+          $ref: '#/components/schemas/TemperatureUnit'
+        orderEquipmentReference:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+
+    OrderShipmentRequest:
+      type: object
+      properties:
+        customerCreatedFlag:
+          type: boolean
+          example: false
+          default: false
+        isModified:
+          type: boolean
+          example: false
+          default: false
+        srcGeneratedId:
+          type: string
+          example: 123456777775
+        srcOrderConfirmationNumber:
+          type: string
+        orderShipmentRequestId:
+          type: string
+          example: "G35HBHELedzCx0t7Rq9Z"
+        orderShipmentRequestNumber:
+          type: string
+          example: 123456789
+        reservation:
+          $ref: '#/components/schemas/Reservation'
+        requestedAtDestinationTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        status:
+          $ref: '#/components/schemas/Status'
+        paymentCode:
+          type: string
+          example: P
+          enum:
+            - P
+        orderedEquipmentOwner:
+          $ref: '#/components/schemas/EquipmentOwnerCode'
+        orderedEquipmentOwnerDesc:
+          type: string
+        orderedEquipmentType:
+          $ref: '#/components/schemas/EquipmentTypeCode'
+        orderedEquipmentTypeDesc:
+          type: string
+        totalLadingWeight:
+          type: number
+          example: 2000
+        totalLadingWeightUom:
+          $ref: '#/components/schemas/TotalWeightUnit'
+        totalQuantity:
+          type: integer
+          format: int32
+          example: 300
+        totalQuantityUom:
+          type: string
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        consignee:
+          $ref: '#/components/schemas/Party'
+        shipTo:
+          $ref: '#/components/schemas/Location'
+        orderShipmentConveyor:
+          $ref: '#/components/schemas/OrderShipmentConveyor'
+        orderShipmentCommodities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShipmentCommodity'
+        orderShipmentTransportStops:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stop'
+        orderError:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRuleError'
+        orderLog:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLog'
+        cancellation:
+          $ref: '#/components/schemas/Cancellation'
+        orderShipmentReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+        equipmentOperationType:
+          type: string
+          example: DELIVERY
+          enum:
+            - DELIVERY
+            - PICKUP
+
+    EmptyDelivery:
+      type: object
+      properties:
+        appointmentWindow:
+          $ref: '#/components/schemas/Appointment'
+        stopType:
+          type: string
+          example: DROP
+          enum:
+            - DROP
+            - STAY
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentRequest'
+
+
+    Appointment:
+      type: object
+      properties:
+        startTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        endTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+
+
+
+    #    Terminal:
+    #      type: object
+    #      properties:
+    #        terminalId:
+    #          type: string
+    #      allOf:
+    #        - $ref: '#/components/schemas/Facility'
+
+    Rule:
+      type: object
+      properties:
+        createdUser:
+          type: string
+          example: "xt12345"
+        updatedUser:
+          type: string
+          example: "xt1324"
+        customerAccountId:
+          type: string
+          example: "dgfgfhgjhkljwertyuio"
+          description: "Firestore id"
+        customerAccountNumber:
+          type: string
+          example: "1324"
+        effectiveDate:
+          type: string
+          example: "2020-04-14"
+        expiryDate:
+          type: string
+          example: "2020-04-14"
+        errorId:
+          type: string
+          example: "SCIOBRE007"
+        errorMessageLanguage:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessageLanguage'
+        customerLocationsiteId:
+          type: string
+          example: "dgfgfhgjhkljwertyuio"
+          description: "Firestore Id"
+        customerLocationSequenceNumber:
+          type: string
+          example: "1324"
+        orderChannel:
+          type: string
+          example: "SCIO"
+        ruleClassification:
+          type: string
+          example: "create-order"
+        ruleConfigId:
+          type: string
+          example: "dgfgfhgjhkljwertyuio"
+          description: "Firestore generated ID"
+        ruleDesc:
+          type: string
+          example: "ShipFrom Validation in SCIO Table"
+        ruleName:
+          type: string
+          example: "ShipFromValidateRule"
+        ruleCategory:
+          type: string
+          example: "Payer of Freight"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        configParams:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigParam'
+
+    ErrorMessageLanguage:
+      properties:
+        languageName:
+          type: string
+          example: ENGLISH
+          enum:
+            - ENGLISH
+            - FRENCH
+        errorMessage:
+          type: string
+          example: "Ship From provided does not match any of our records"
+
+    ConfigParam:
+      type: object
+      properties:
+        customerAccountNumber:
+          type: string
+          example: "1324"
+        customerLocationSequenceNumber:
+          type: string
+          example: "1324"
+        configParamId:
+          type: string
+          example: "CfixZcm2GuS9KYveE8BZ"
+        effectiveDate:
+          type: string
+          example: "2020-04-14"
+        expiryDate:
+          type: string
+          example: "2020-04-14"
+        paramDescription:
+          type: string
+          example: "Configurable days"
+        paramName:
+          type: string
+          example: "CONFIGURABLE_DAYS"
+        paramValue:
+          type: string
+          example: "5"
+        uom:
+          type: string
+          example: "days"
+        ruleConfigId:
+          type: string
+          example: "CfixZcm2GuS9KYveE8BZ"
+        createdUser:
+          type: string
+          example: "xt12345"
+        updatedUser:
+          type: string
+          example: "xt1234"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        srcFacilityNumber:
+          type: string
+
+    Facility:
+      type: object
+      properties:
+        facilityId:
+          type: string
+          example: "firestore id"
+          description: "This is generated by service during creation, any id passed here will be ignored in create & update API"
+        facilityType:
+          $ref: '#/components/schemas/FacilityType'
+        facilityCode:
+          type: string
+          example: "C"
+        customerLocationKey:
+          type: array
+          items:
+            type: string
+            example:  "ON-FOOBAY"
+            description: "This is concatenation of state and city of customer location (rather than the facility's present in facility Object) used in other layers to link it with customer and this will not be stored in firestore"
+        facilityNumber:
+          type: string
+          example: "19845"
+        srcFacilityNumber:
+          type: integer
+          example: "78785"
+        isPrimaryRamp:
+          type: boolean
+          example: true
+        splcCode:
+          type: string
+          example: "12121"
+        facilityName:
+          type: string
+          example: "Calgary"
+        facilityAltName:
+          type: string
+#        country:
+#          $ref: '#/components/schemas/Country'
+#        state:
+#          $ref: '#/components/schemas/State'
+        carrierAbbreviation:
+          type: string
+          example: "AASE"
+        carrierNumber:
+          type: string
+          example: ""
+        effectiveDate:
+          type: string
+          example: "16/07/2022"
+        expiryDate:
+          type: string
+          example: "16/07/2022"
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        facilityAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/FacilityAddress'
+      allOf:
+        - $ref: '#/components/schemas/Location'
+
+    FacilityAddress:
+      type: object
+      properties:
+        facilityAddressId:
+          type: string
+          example: "uuid"
+          description: "This is generated by service during creation, any id passed here will be ignored in create & update API"
+        addressId:
+          type: number
+          example: 1
+        streetNumber:
+          type: string
+          example: "17569"
+        streetNumberSuffix:
+          type: string
+          example: ""
+        streetType:
+          type: string
+          example: "AVE"
+        streetDirectionCode:
+          type: string
+          example: ""
+        streetAddressUnit:
+          type: string
+          example: ""
+        provinceStateCode:
+          $ref: '#/components/schemas/State'
+        countryCode:
+          $ref: '#/components/schemas/Country'
+        postalCode:
+          type: string
+          example: "V4N 3M4"
+        longitude:
+          type: double
+          example: 49.19129
+        latitude:
+          type: double
+          example: -122.735275
+        timeZoneOffset:
+          type: string
+          example: "PT"
+        dayLightSavingsTimeIndicator:
+          type: boolean
+          example: "Y"
+        streetName:
+          type: string
+          example: "104"
+        cityName:
+          type: string
+          example: "SURREY"
+        addressCommonName:
+          type: string
+          example: "Main Address"
+        effectiveDate:
+          type: string
+          example: "16/07/2022"
+        expiryDate:
+          type: string
+          example: "16/07/2022"
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+
+
+
+    Commodity:
+      type: object
+      properties:
+        stcc:
+          type: string
+          example: 11
+        stccDescription:
+          type: string
+          example: "COAL"
+
+    CustomerAccount:
+      type: object
+      properties:
+        orderPartyId:
+          type: string
+        customerAccountId:
+          type: string
+        customerAccountNumber:
+          type: string
+        name:
+          type: string
+        customerAccountStatusDesc:
+          type: string
+        customerAccountStatusCode:
+          type: string
+        preferredLanguageTypeCode:
+          type: string
+        preferredLanguageTypeName:
+          type: string
+        customerAccountTypeCode:
+          type: string
+        customerAccountProfile:
+          $ref: '#/components/schemas/CustomerAccountLocationProfile'
+
+
+    OrderingParty:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+          required:
+            - contact
+          properties:
+            orderPartyContact:
+              $ref: '#/components/schemas/Contact'
+
+    Party:
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+        - type: object
+          properties:
+            address:
+              $ref: '#/components/schemas/Location'
+
+
+
+    Location:
+      type: object
+      properties:
+        locationType:
+          type: string
+          example: CustomerAccountLocation
+          enum:
+            - CustomerAccountLocation
+            - Facility
+            - IntermodalLocation
+            - OtherLocation
+        city:
+          type: string
+          example: "Prince Rupert"
+        state:
+          $ref: '#/components/schemas/State'
+        country:
+          $ref: '#/components/schemas/Country'
+      discriminator:
+        propertyName: locationType
+
+    CustomerAccountLocation:
+      type: object
+      properties:
+        customerAccountLocationId:
+          type: string
+        customerLocationsiteId:
+          type: string
+          example: "uuid"
+        customerLocationSequenceNumber:
+          type: integer
+        streetNumber:
+          type: string
+        suffix:
+          type: string
+        streetName:
+          type: string
+        streetType:
+          type: string
+        streetDirection:
+          type: string
+        unit:
+          type: string
+        postalCode:
+          type: string
+        addrLine1:
+          type: string
+        addrLine2:
+          type: string
+        addrLine3:
+          type: string
+        timeZone:
+          $ref: '#/components/schemas/TimezoneCode'
+        isFollowingDayLightSaving:
+          type: boolean
+        customerAccountLocationProfile:
+          $ref: '#/components/schemas/CustomerAccountLocationProfile'
+        customer:
+          $ref: '#/components/schemas/CustomerAccount'
+        ramps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facility'
+      allOf:
+        - $ref: '#/components/schemas/Location'
+
+
+    OtherLocation:
+      type: object
+      properties:
+        description:
+          type: string
+          example: "UNKNOWN"
+          default: "UNKNOWN"
+        customer:
+          $ref: '#/components/schemas/CustomerAccount'
+      allOf:
+        - $ref: '#/components/schemas/Location'
+
+
+    CustomerAccountLocationProfile:
+      type: object
+      properties:
+        customerAccountLocationProfileId:
+          type: string
+          example: "2cdf4154-ef0e-4705-84f9-9efa6578002a"
+        srcProfileId:
+          type: number
+          example: "1233"
+        profileType:
+          $ref: '#/components/schemas/ProfileType'
+        profileStatus:
+          $ref: '#/components/schemas/ProfileStatus'
+        effectiveDate:
+          type: string
+          example: ""
+        expiryDate:
+          type: string
+          example: ""
+        doorCount:
+          type: integer
+          example: 5
+        customerAccountNumber:
+          type: string
+          example: "121212"
+        customerLocationSequenceNumber:
+          type: integer
+          example: 123
+        customerReferenceLocationType:
+          type: string
+          example: ""
+        locationProfileUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        equipmentGridMinimumCode:
+          $ref: '#/components/schemas/EquipmentGridCode'
+        equipmentGridMaximumCode:
+          $ref: '#/components/schemas/EquipmentGridCode'
+        truckMaximumWeight:
+          type: integer
+          example: ""
+        tracSizeCode:
+          type: string
+          example: ""
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        locationCommonName:
+          type: string
+          example: "DEFAULT LOCATION"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        customerAccountLocationFacility:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerAccountLocationFacility'
+        customerAccountLocationPreference:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerAccountLocationPreference'
+
+    CustomerAccountLocationFacility:
+      type: object
+      properties:
+        customerAccountLocationFacilityId:
+          type: string
+          example: "2cdf4154-ef0e-4705-84f9-9efa6578002a"
+        customerAccountLocationProfileId:
+          type: string
+          example: "2cdf4154-ef0e-4705-84f9-9efa6578002a"
+        srcFacilityId:
+          type: integer
+          example: 234
+        srcFacilityNumber:
+          type: integer
+          example: 180
+        usageCode:
+          type: string
+          example: ""
+        sequence:
+          type: string
+          example: ""
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+
+    CustomerAccountLocationPreference:
+      type: object
+      properties:
+        customerAccountLocationPreferenceId:
+          type: string
+          example: "2cdf4154-ef0e-4705-84f9-9efa6578002a"
+        srcPreferenceId:
+          type: integer
+          example: 180
+        category:
+          type: string
+          example: "PRIVILEGE"
+        subCategory:
+          type: integer
+          example: 1
+        preferenceCode:
+          type: string
+          example: "privName"
+        value:
+          type: string
+          example: "DestNotReq"
+        srcCreateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        srcLastUpdateTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:00:00.000"
+        createdUser:
+          type: string
+          example: "00052443"
+        updatedUser:
+          type: string
+          example: "00052443"
+        effectiveDate:
+          type: string
+          example: "2000-01-01"
+        expiryDate:
+          type: string
+          example: "9999-12-31"
+        customerAccountLocationProfileId:
+          type: string
+          example: "174"
+        flag:
+          type: string
+          example: false
+
+    EquipmentGridCode:
+      type: string
+      example: A
+      enum:
+        - A
+        - B
+        - C
+        - D
+        - E
+
+    ProfileType:
+      type: string
+      example: CUS
+      enum:
+        - CUS
+        - DLC
+        - DCL
+        - ADM
+        - DTM
+        - FTR
+        - LOC
+        - TER
+        - PTR
+
+    ProfileStatus:
+      type: string
+      example: A
+      enum:
+        - A
+        - X
+        - E
+
+
+    IntermodalLocation:
+      type: object
+      properties:
+        customerAccountLocationId:
+          type: string
+        customerLocationsiteId:
+          type: string
+          example: "uuid"
+        customerLocationSequenceNumber:
+          type: integer
+        streetNumber:
+          type: string
+        suffix:
+          type: string
+        streetName:
+          type: string
+        streetType:
+          type: string
+        streetDirection:
+          type: string
+        unit:
+          type: string
+        postalCode:
+          type: string
+        addrLine1:
+          type: string
+        addrLine2:
+          type: string
+        addrLine3:
+          type: string
+        timeZone:
+          $ref: '#/components/schemas/TimezoneCode'
+        isFollowingDayLightSaving:
+          type: boolean
+        customerAccountLocationProfile:
+          $ref: '#/components/schemas/CustomerAccountLocationProfile'
+        customer:
+          $ref: '#/components/schemas/CustomerAccount'
+        ramps:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facility'
+      allOf:
+        - $ref: '#/components/schemas/Location'
+
+    TimezoneCode:
+      type: string
+      example: CA
+      enum:
+        - AK
+        - AT
+        - CT
+        - ET
+        - MT
+        - NT
+        - PT
+
+    Stop:
+      type: object
+      properties:
+        orderShipmentTransportStopId:
+          type: string
+          example: "uuid"
+        stopOperationType:
+          $ref: '#/components/schemas/OperationType'
+        stopType:
+          $ref: '#/components/schemas/StopType'
+        helperCount:
+          type: number
+          example: 4
+        stopSequence:
+          type: number
+          example: 1
+        appointmentWindow:
+          $ref: '#/components/schemas/Appointment'
+        orderShipmentStopReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+        orderError:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessRuleError'
+        location:
+          $ref: '#/components/schemas/Location'
+
+
+
+    OrderShipmentConveyor:
+      type: object
+      properties:
+        orderShipmentConveyorId:
+          type: string
+          example: "uuid"
+        equipment:
+          $ref: '#/components/schemas/Conveyor'
+
+    Conveyor:
+      type: object
+      properties:
+        equipmentId:
+          type: string
+          example: "CNRU57463"
+        equipmentInit:
+          type: string
+          example: "AABX"
+        equipmentNumber:
+          type: integer
+          format: int32
+          example: 100823
+        checkDigit:
+          type: number
+          example: 5
+        grossWeight:
+          type: number
+          format: float
+          example: 611
+        grossWeightUom:
+          $ref: '#/components/schemas/WeightUnit'
+        weightQualifier:
+          type: string
+        temperature:
+          type: number
+          example: 30
+        temperatureUnit:
+          $ref: '#/components/schemas/TemperatureUnit'
+        status:
+          type: string
+
+    ShipmentCommodity:
+      type: object
+      properties:
+        orderShipmentCommodityId:
+          type: string
+          example: "uuid"
+        commodity:
+          $ref: '#/components/schemas/Commodity'
+        harmonizedSystemCodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/HSCode'
+
+    HSCode:
+      type: object
+      properties:
+        harmonizedCode:
+          type: string
+          example: 878787
+        harmonizedCodeDesc:
+          type: string
+          example: "COAL"
+
+    TemperatureUnit:
+      type: string
+      example: C
+      enum:
+        - C
+        - F
+
+    OperationType:
+      type: string
+      example: DELIVERY
+      enum:
+        - DELIVERY
+        - PICKUP
+    StopType:
+      type: string
+      example: DROP
+      enum:
+        - DROP
+        - STAY
+
+    BusinessConstants:
+      type: object
+      properties:
+        businessConstantId:
+          type: string
+          example: "Firestore generated id"
+        code:
+          type: string
+          example: ZZ
+        description:
+          type: string
+        value:
+          type: string
+          example: "Mutually defined"
+        category:
+          type: string
+          example: REFERENCE_TYPE
+          enum:
+            - REFERENCE_TYPE
+            - PACKAGE_TYPE
+            - SYSTEM_CONFIG
+            - ROLLED_OUT_CUSTOMER
+            - CANCELLATION_REASON
+        effectiveDate:
+          type: timestamp
+          example: "16/07/2022"
+        expiryDate:
+          type: timestamp
+          example: "16/07/2022"
+        createdTimestamp:
+          type: timestamp
+          example: "2007/06/18 11:34:34"
+        updatedTimestamp:
+          type: timestamp
+          example: "2007/06/18 11:34:34"
+        createdUser:
+          type: string
+          example: 'SCIO'
+
+    Contact:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "William"
+        lastName:
+          type: string
+          example: "Richard"
+        businessPhoneWithExtn:
+          type: string
+          example: "+918763497693"
+        mobilePhone:
+          type: string
+          example: "9478341267"
+        orderContact:
+          type: string
+          example: "Michael"
+        email:
+          type: string
+          example: "williamrichard@gmail.com"
+
+    Reference:
+      type: object
+      properties:
+        referenceType:
+          type: string
+          example: "Shipment ID"
+        referenceValue:
+          type: string
+          example: "28652"
+        referenceDesc:
+          type: string
+        primaryIndicator:
+          type: boolean
+          example: false
+        referenceTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        sendToDriverIndicator:
+          type: boolean
+
+    CustomerAccountLocationHistory:
+      type: object
+      properties:
+        customerAccountLocation:
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+      allOf:
+        - $ref: '#/components/schemas/CustomerAccount'
+
+    OrderResponse:
+      type: object
+      properties:
+        orderRequestId:
+          type: string
+          example: "8285a34c-53cd-43b4-92f3-f4af67cdf544"
+        orderId:
+          type: string
+          example: "9151f21f-43ae-43b4-92f3-f4af67cdf544"
+        orderNumber:
+          type: string
+          example: 102232323
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreValidationError'
+        order:
+          $ref: '#/components/schemas/Order'
+
+
+    AddressHistoryResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerAccountLocationHistory'
+        totalElements:
+          type: number
+          example: 150
+        totalPages:
+          type: number
+          example: 3
+        page:
+          type: number
+          example: 1
+
+    OrderContactResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        totalElements:
+          type: number
+          example: 150
+        totalPages:
+          type: number
+          example: 3
+        page:
+          type: number
+          example: 1
+
+    ErrorResponse500:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "System error occurred. Please contact System Administrator"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+                enum:
+                  - SCIO001
+              description:
+                type: string
+                example: "System error occurred. Please contact System Administrator"
+    ErrorResponse401:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Client Authentication is missing"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+                enum:
+                  - SCIO001
+              description:
+                type: string
+                example: "Client Authentication is missing"
+    ErrorResponse403:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Client is not authorized"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+                enum:
+                  - SCIO001
+              description:
+                type: string
+                example: "Client is not authorized"
+    ErrorResponse400:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Missing Mandatory field(s) or invalid data format"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+                enum:
+                  - SCIO001
+              description:
+                type: string
+                example: "Missing Mandatory field(s) or invalid data format"
+    ErrorResponse404:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Not found"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              errorCode:
+                type: string
+                enum:
+                  - SCIO001
+              description:
+                type: string
+                example: "Not found"
+
+    BreValidationError:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          example: "RB105"
+        errorMessage:
+          type: string
+          example: "Order Contact Email Validation failed"
+
+    BreRuleErrorMessage:
+      type: object
+      properties:
+        errorType:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+
+    BreRuleResult:
+      type: object
+      properties:
+        ruleId:
+          type: string
+        ruleName:
+          type: string
+        errorMessage:
+          $ref: '#/components/schemas/BreRuleErrorMessage'
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - FAILURE
+
+    BreValue:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/Order'
+        orderValidationList:
+          type: array
+          items:
+            $ref: '#/components/schemas/BreRuleResult'
+
+    BreResponse:
+      type: object
+      properties:
+        value:
+          $ref: '#/components/schemas/BreValue'
+
+    Country:
+      type: string
+      example: CA
+      enum:
+        - CA
+        - CN
+        - US
+        - MX
+        - null
+
+
+    State:
+      type: string
+      example: QC
+      enum:
+        - null
+        - AB
+        - AG
+        - AGU
+        - AK
+        - AL
+        - AR
+        - AZ
+        - BC
+        - BJ
+        - BS
+        - BCN
+        - CA
+        - CA-AB
+        - CA-BC
+        - CA-MB
+        - CA-NB
+        - CA-NS
+        - CA-NT
+        - CA-ON
+        - CA-QC
+        - CA-SK
+        - CDMX
+        - CH
+        - CHH
+        - CI
+        - CL
+        - CMX
+        - CO
+        - COA
+        - COL
+        - CP
+        - CT
+        - CU
+        - DC
+        - DE
+        - DF
+        - DG
+        - DUR
+        - EM
+        - FL
+        - GA
+        - GJ
+        - GR
+        - GUA
+        - HG
+        - HI
+        - IA
+        - ID
+        - IL
+        - IN
+        - JA
+        - JAL
+        - KS
+        - KY
+        - LA
+        - MA
+        - MB
+        - MD
+        - ME
+        - MEX
+        - MH
+        - MI
+        - MIC
+        - MN
+        - MO
+        - MOR
+        - MR
+        - MS
+        - MT
+        - MX-BCN
+        - NA
+        - NB
+        - NC
+        - ND
+        - NE
+        - NF
+        - NH
+        - NJ
+        - NL
+        - NLE
+        - NM
+        - NS
+        - NT
+        - NU
+        - NV
+        - NY
+        - OA
+        - OH
+        - OK
+        - "ON"
+        - OR
+        - PA
+        - PE
+        - PQ
+        - PR
+        - PU
+        - PUE
+        - QA
+        - QC
+        - QR
+        - QUE
+        - RI
+        - SC
+        - SD
+        - SI
+        - SIN
+        - SK
+        - SL
+        - SLP
+        - SO
+        - SON
+        - TA
+        - TAM
+        - TL
+        - TLA
+        - TM
+        - TN
+        - TX
+        - US-AL
+        - US-AR
+        - US-AZ
+        - US-CA
+        - US-CO
+        - US-CT
+        - US-DC
+        - US-DE
+        - US-FL
+        - US-GA
+        - US-IA
+        - US-ID
+        - US-IL
+        - US-IN
+        - US-KS
+        - US-KY
+        - US-LA
+        - US-MA
+        - US-MD
+        - US-ME
+        - US-MI
+        - US-MN
+        - US-MO
+        - US-MS
+        - US-MT
+        - US-NC
+        - US-ND
+        - US-NE
+        - US-NH
+        - US-NJ
+        - US-NM
+        - US-NV
+        - US-NY
+        - US-OH
+        - US-OK
+        - US-OR
+        - US-PA
+        - US-RI
+        - US-SC
+        - US-SD
+        - US-TN
+        - US-TX
+        - US-UT
+        - US-VA
+        - US-VT
+        - US-WA
+        - US-WI
+        - US-WV
+        - US-WY
+        - UT
+        - VA
+        - VER
+        - VL
+        - VT
+        - WA
+        - WI
+        - WV
+        - WY
+        - YC
+        - YK
+        - YT
+        - ZT
+        - YUC
+        - ZAC
+
+    FacilityType:
+      type: string
+      enum:
+        - Terminal
+        - Port
+        - Station
+
+    Status:
+      type: string
+      example: SUBMITTED
+      enum:
+        - SUBMITTED
+        - ACCEPTED
+        - ASSIGNED
+        - DECLINED
+        - SUBSTITUTED
+        - COMPLETED
+        - DRAFT
+        - IN_ERROR_NOT_SUBMITTED
+        - SEE_DETAILS
+        - CANCELLED
+        - EXECUTING
+        - INTRANSIT
+        - ARRIVED_AT_LOCATION
+        - DISCARDED
+        - RELEASED
+        - RELEASEVOIDED
+        - PENDING
+        - EMPTY RELEASED
+        - EMPTY RELEASED VOIDED
+        - SAVED
+
+    TotalWeightUnit:
+      type: string
+      example: K
+      enum:
+        - K
+        - L
+
+
+    QuantityUnit:
+      type: string
+      example: BAG
+      enum:
+        - BAG
+        - BDL
+        - BOX
+        - CAS
+        - CNT
+        - CRT
+        - CSK
+        - CTN
+        - CYL
+        - DRM
+        - ETY
+        - PCS
+        - PKG
+        - PLT
+        - RCK
+        - ROL
+        - SKD
+        - SPL
+        - TNK
+        - UNT
+        - REL
+        - KIT
+        - TBN
+        - COL
+        - KEG
+        - JAR
+        - BLK
+        - BIN
+        - BBL
+        - BKG
+        - BXT
+        - TRY
+        - AMM
+        - TLD
+        - LIF
+        - PAL
+        - BAL
+        - VEH
+        - LFT
+        - BAS
+        - CBY
+        - LIT
+        - CAN
+        - CND
+        - TRK
+        - SAK
+        - BUS
+        - TBE
+    WeightUnit:
+      type: string
+      example: K
+      enum:
+        - K
+        - L
+
+    EquipmentOwnerCode:
+      type: string
+      example: C
+      enum:
+        - C
+        - I
+        - E
+        - F
+        - P
+        - B
+        - W
+        - U
+        - T
+        - Z
+        - N
+
+    EquipmentTypeCode:
+      type: string
+      example: KC2
+      enum:
+        - JC1
+        - JC2
+        - JM1
+        - JM4
+        - JM7
+        - KC1
+        - KC2
+        - KC3
+        - KC4
+        - KC5
+        - KC6
+        - KC7
+        - KC8
+        - KE7
+        - KF1
+        - KF2
+        - KF3
+        - KF4
+        - KF5
+        - KF6
+        - KF7
+        - KH1
+        - KH2
+        - KH3
+        - KH4
+        - KH5
+        - KH6
+        - KH7
+        - KI1
+        - KI2
+        - KI3
+        - KI4
+        - KI5
+        - KI6
+        - KI7
+        - KO1
+        - KO2
+        - KO3
+        - KO4
+        - KO5
+        - KO6
+        - KO7
+        - KR1
+        - KR2
+        - KR3
+        - KR4
+        - KR5
+        - KR6
+        - KR7
+        - KT1
+        - KT2
+        - KT3
+        - KT4
+        - KT5
+        - KT6
+        - KW2
+        - KW7
+        - UC0
+        - UC1
+        - UC2
+        - UC4
+        - UC5
+        - UC6
+        - UC7
+        - UC8
+        - UC9
+        - UR3
+        - VF1
+        - VF2
+        - VF3
+        - VF7
+        - VF8
+        - VH1
+        - VH2
+        - VH3
+        - VH5
+        - VH7
+        - VI1
+        - VI2
+        - VI3
+        - VI6
+        - VR1
+        - VR5
+        - VR8
+        - VT1
+        - VT2
+        - VT3
+        - VV1
+        - VV3
+        - VV4
+        - VV6
+        - VV7
+        - VV8
+
+    orderStatusModel:
+      type: object
+      properties:
+        eventId:
+          type: string
+          example: event001
+        eventType:
+          type: string
+          example: EVENT
+        source:
+          type: string
+          example: IM-Order
+        isDuplicate:
+          type: int
+          example: 1
+        eventTimestamp:
+          type: Timestamp
+          example: 2022-11-08T10:28:07Z
+        orderEquipmentStatusEvent:
+          $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+
+
+    TransportShipmentStatusModel:
+      type: object
+      properties:
+        eventId:
+          type: string
+          example: "123"
+        source:
+          type: string
+          example: "123"
+        eventTimestamp:
+          type: timestamp
+          example: 123
+        transportShipmentStatusEvent:
+          $ref: '#/components/schemas/TransportShipmentStatusEvent'
+
+
+    EventHeader:
+      type: object
+      properties:
+        msgType:
+          type: string
+          example: OB-OrderUpdate
+        actCd:
+          type: string
+          example: A
+        srcAppl:
+          type: string
+          example: IM-Order
+        origAppl:
+          type: string
+          example: IM-Order
+        trgtAppl:
+          type: string
+          example: BROKER
+        msgCrtTs:
+          type: timestamp
+          example: 2022-11-08T10:28:07Z
+
+    TransportShipmentStatusEvent:
+      type: object
+      properties:
+        orderShipmentRequestId:
+          type: string
+        status:
+          type: string
+        orderCorrelationNumber:
+          type: string
+        orderNumber:
+          type: string
+        imxOrderId:
+          type: string
+        cancellation:
+          $ref: "#/components/schemas/Cancellation"
+        transportShipmentReference:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportShipmentReference"
+        eqpDetails:
+          $ref: "#/components/schemas/EqpDetails"
+        stopDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/StopDetails"
+
+    TransportShipmentReference:
+      type: object
+      properties:
+        referenceType:
+          type: string
+        referenceValue:
+          type: string
+        referenceDesc:
+          type: string
+        primaryIndicator:
+          type: boolean
+          example: false
+
+    StopDetails:
+      type: object
+      properties:
+        locType:
+          type: string
+        custNumber:
+          type: string
+        custLocSeq:
+          type: integer
+        facilityNumber:
+          type: number
+        facilityName:
+          type: string
+        stopSequence:
+          type: number
+        stopOperationType:
+          type: string
+        stopType:
+          type: string
+        partyRole:
+          type: string
+#        stopReference:
+#          type: array
+#          items:
+#            $ref: "#/components/schemas/Reference"
+#        stopComments:
+#          type: string
+        status:
+          $ref: "#/components/schemas/Status"
+        orderParty:
+          $ref: "#/components/schemas/Location"
+
+    EqpDetails:
+      type: object
+      properties:
+        eqpInit:
+          type: string
+        eqpNbr:
+          type: string
+        eqpType:
+          type: string
+        eqpOwnTypeCd:
+          type: string
+        equipmentOwnerDesc:
+          type: string
+        equipmentTypeDesc:
+          type: string
+
+
+
+    OrderEquipmentStatusEvent:
+      type: object
+      properties:
+        orderEquipmentRequestId:
+          type: string
+          example: 123456777775
+        status:
+          type: string
+          example: Accepted
+        orderCorrelationNumber:
+          type: string
+          example: 2283-82268
+        imxOrderId:
+          type: string
+          example: 123456777775
+        orderNumber:
+          type: string
+          example: O123456777775
+        stopDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/StopDetails"
+      discriminator:
+        propertyName: status
+
+    Equipment:
+      type: object
+      properties:
+        equipmentInit:
+          type: string
+          example: 123456777775
+        equipmentNumber:
+          type: string
+          example: Accepted
+        allocatedEquipmentType:
+          type: string
+          example: 2283-82268
+        allocatedEquipmentTypeDesc:
+          type: string
+          example: 2283-82268
+        allocatedEquipmentOwner:
+          type: string
+          example: 123456777775
+        allocatedEquipmentOwnerDesc:
+          type: string
+          example: 123456777775
+        usedEquipmentType:
+          type: string
+          example: 2283-82268
+        usedEquipmentTypeDesc:
+          type: string
+          example: 2283-82268
+        usedEquipmentOwner:
+          type: string
+          example: 123456777775
+        usedEquipmentOwnerDesc:
+          type: string
+          example: 123456777775
+
+    Submitted:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Accepted:
+      type: object
+      properties:
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Assigned:
+      type: object
+      properties:
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Intransit:
+      type: object
+      properties:
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Released:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    ReleaseVoided:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Completed:
+      type: object
+      properties:
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reference'
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Declined:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    Cancelled:
+      type: object
+      properties:
+        cancellationReason:
+          $ref: '#/components/schemas/CancellationReason'
+      allOf:
+        - $ref: '#/components/schemas/OrderEquipmentStatusEvent'
+
+    CancellationReason:
+      type: object
+      properties:
+        cancellationReasonCode:
+          type: string
+          example: "OTH"
+        cancellationComment:
+          type: string
+          example: "Reason for cancellation"
+        cancellationReasonDesc:
+          type: string
+
+    EquipmentTypeOwner:
+      type: object
+      properties:
+        equipmentTypeOwnerId:
+          type: string
+          example: "firestore generated id"
+          description: "This is generated by service during creation, any id passed here will be ignored in create & update API"
+        equipmentTypeOwnerCode:
+          type: string
+          example: C
+          enum:
+            - P
+            - I
+            - C
+            - B
+            - E
+            - F
+        equipmentTypeOwnerCodeDesc:
+          type: string
+          example: CN
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+          description: "This field will be ignored in Create and Update request payload."
+        equipmentCode:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentCode'
+
+    EquipmentCode:
+      type: object
+      properties:
+        equipmentCodeId:
+          type: string
+        equipmentCode:
+          type: string
+          example: KC6
+          enum:
+            - JC1
+            - JC2
+            - JM1
+            - JM4
+            - JM7
+            - KC1
+            - KC2
+            - KC3
+            - KC4
+            - KC5
+            - KC6
+            - KC7
+            - KC8
+            - KE7
+            - KF1
+            - KF2
+            - KF3
+            - KF4
+            - KF5
+            - KF6
+            - KF7
+            - KH1
+            - KH2
+            - KH3
+            - KH4
+            - KH5
+            - KH6
+            - KH7
+            - KI1
+            - KI2
+            - KI3
+            - KI4
+            - KI5
+            - KI6
+            - KI7
+            - KO1
+            - KO2
+            - KO3
+            - KO4
+            - KO5
+            - KO6
+            - KO7
+            - KR1
+            - KR2
+            - KR3
+            - KR4
+            - KR5
+            - KR6
+            - KR7
+            - KT1
+            - KT2
+            - KT3
+            - KT4
+            - KT5
+            - KT6
+            - KW2
+            - KW7
+            - UC0
+            - UC1
+            - UC2
+            - UC4
+            - UC5
+            - UC6
+            - UC7
+            - UC8
+            - UC9
+            - UR3
+            - VF1
+            - VF2
+            - VF3
+            - VF7
+            - VF8
+            - VH1
+            - VH2
+            - VH3
+            - VH5
+            - VH7
+            - VI1
+            - VI2
+            - VI3
+            - VI6
+            - VR1
+            - VR5
+            - VR8
+            - VT1
+            - VT2
+            - VT3
+            - VV1
+            - VV3
+            - VV4
+            - VV6
+            - VV7
+            - VV8
+            - AA6
+            - ABD
+            - ABE
+            - ABF
+            - AB3
+            - AB5
+            - AB6
+            - ACD
+            - ACE
+            - ACF
+            - AC1
+            - AC3
+            - AC4
+            - AC5
+            - AC6
+            - ADB
+            - ADD
+            - ADF
+            - AD4
+            - A1E
+            - A13
+            - A15
+            - A2C
+            - A2E
+            - A2F
+            - A21
+            - A23
+            - A24
+            - A25
+            - A26
+            - A3A
+            - A3E
+            - A3F
+            - A31
+            - A35
+            - A36
+            - A5
+            - A6A
+            - A6B
+            - A6C
+            - A6D
+            - A6E
+            - A6F
+            - A63
+            - A64
+            - A65
+            - A66
+            - A7D
+            - A7E
+            - A7F
+            - A74
+            - A75
+            - A76
+            - A86
+            - BBD
+            - BBE
+            - BCE
+            - BCF
+            - BC5
+            - BC6
+            - BDD
+            - B1
+            - B12
+            - B13
+            - B14
+            - B15
+            - B2A
+            - B2C
+            - B2D
+            - B21
+            - B22
+            - B23
+            - B24
+            - B25
+            - B3A
+            - B3C
+            - B3E
+            - B3F
+            - B31
+            - B6C
+            - B6D
+            - B6E
+            - B6F
+            - B63
+            - B64
+            - B65
+            - B7E
+            - B7F
+            - B75
+            - B76
+            - CCG
+            - CJA
+            - CJC
+            - CJG
+            - CJM
+            - CJP
+            - CMC
+            - CMG
+            - CMP
+            - CSC
+            - CSG
+            - CSM
+            - CSP
+            - CXA
+            - CXC
+            - CXG
+            - CXP
+            - CX3
+            - C1G
+            - C2A
+            - C2C
+            - C2G
+            - C2M
+            - C2P
+            - C3A
+            - C3C
+            - C3G
+            - C3M
+            - C3P
+            - C31
+            - C4A
+            - C4C
+            - C4G
+            - C4M
+            - C4P
+            - C43
+            - C5A
+            - C5C
+            - C5G
+            - C5M
+            - C5P
+            - C53
+            - D4N
+            - D5C
+            - D5N
+            - D6C
+            - D6I
+            - D6N
+            - D7C
+            - ETD
+            - FB4
+            - FB5
+            - FB6
+            - FB7
+            - FC4
+            - FC5
+            - FC6
+            - FC7
+            - FD
+            - FH
+            - FP4
+            - FP5
+            - FP6
+            - FP7
+            - FW
+            - FX
+            - GPA
+            - GPB
+            - GPC
+            - GP0
+            - GP5
+            - GP7
+            - GRC
+            - GR0
+            - GSB
+            - GSC
+            - GS0
+            - GS7
+            - G4C
+            - G40
+            - G5B
+            - G5C
+            - G50
+            - G57
+            - G6A
+            - G6B
+            - G6C
+            - G60
+            - G67
+            - HL2
+            - HL3
+            - HS2
+            - HS3
+            - H02
+            - H03
+            - H72
+            - LA3
+            - LB3
+            - LB4
+            - LB5
+            - LB6
+            - LC5
+            - LC6
+            - L43
+            - L53
+            - L54
+            - L55
+            - L56
+            - L61
+            - L65
+            - L66
+            - M1B
+            - M2A
+            - M2B
+            - M2D
+            - M2E
+            - M2F
+            - M3A
+            - M3B
+            - M3C
+            - M3E
+            - NB4
+            - NB5
+            - N53
+            - N54
+            - N55
+            - N56
+            - N65
+            - N66
+            - N72
+            - N74
+            - O1
+            - PA3
+            - PB3
+            - PC2
+            - PC3
+            - PC4
+            - PD2
+            - PD4
+            - PRR
+            - PS2
+            - PS3
+            - PS4
+            - PT1
+            - PT2
+            - PT3
+            - PT4
+            - QB3
+            - QB4
+            - QB5
+            - QD2
+            - QD3
+            - QD5
+            - QS2
+            - QS3
+            - QS4
+            - QS5
+            - QT2
+            - QT3
+            - QT7
+            - RCN
+            - R5C
+            - R5N
+            - R6C
+            - R6N
+            - R7N
+            - TOC
+            - T2C
+            - T3A
+            - T3C
+            - T3D
+            - T3E
+            - T3F
+            - T3G
+            - T3H
+            - T3I
+            - T4A
+            - T4E
+            - T4F
+            - T4G
+            - T4H
+            - T4I
+            - T5D
+            - T5E
+            - T5F
+            - T5G
+            - T5H
+            - T5I
+            - T6A
+            - T6E
+            - T6F
+            - T6G
+            - T6H
+            - T6I
+            - T7F
+            - T7G
+            - T7H
+            - T7I
+            - UC
+            - UC3
+            - UD7
+            - VV2
+            - WD1
+            - WS1
+            - WS3
+            - WS4
+            - WS5
+            - WS6
+            - Y
+            - YBW
+            - YFW
+            - YO
+            - YVA
+            - Y4
+            - Z
+            - HB
+            - INT
+            - JM2
+            - JM6
+            - JM8
+            - JM9
+            - KG1
+            - KG4
+
+        englishDescription:
+          type: string
+          example: "48' Dry"
+        frenchDescription:
+          type: string
+          example: "48' Dry"
+
+    Reservation:
+      type: object
+      properties:
+        reservationId:
+          type: string
+        srcReservationId:
+          type: string
+          example: "1"
+        reservationNumber:
+          type: string
+          example: "1"
+        subStatus:
+          type: string
+          example: "1"
+        status:
+          type: string
+          example: "1"
+        shipperNumber:
+          type: string
+          example: "1"
+        requestTimestamp:
+          type: string
+          format: date-time
+        requestEquipmentCategoryCode:
+          type: string
+          example: "1"
+        equipmentInitial:
+          type: string
+          example: "1"
+        equipmentNumber:
+          type: string
+          example: "1"
+        actualEquipmentCategoryCode:
+          type: string
+          example: "1"
+        actualEquipmentControlCode:
+          type: string
+          example: "1"
+        originStation:
+          $ref: "#/components/schemas/Facility"
+        destinationStation:
+          $ref: "#/components/schemas/Facility"
+        originDestinationLaneId:
+          type: string
+          example: "1"
+        specifiedTimestamp:
+          type: string
+          format: date-time
+        waybillId:
+          type: string
+          example: "1"
+        intermodelBookingNumber:
+          type: string
+          example: "1"
+        targetOriginCutOffTimestamp:
+          type: string
+          format: date-time
+        customerPriority:
+          type: string
+          example: "1"
+        bussinessCode:
+          type: string
+          example: "1"
+        bussinessCharacterCode:
+          type: string
+          example: "1"
+        requestedTimezoneOffset:
+          type: string
+        customerProfileLabel:
+          type: string
+          example: "1"
+        srcCreateTimestamp:
+          type: string
+          format: date-time
+
+        srcLastUpdateTimestamp:
+          type: string
+          format: date-time
+
+        createdTimestamp:
+          type: string
+          format: date-time
+        updatedTimestamp:
+          type: string
+          format: date-time
+
+    HarmonizedCode:
+      type: object
+      properties:
+        harmonizedId:
+          type: string
+          example: "uuid"
+          description: "This is generated by service during creation, any id passed here will be ignored in create & update API"
+        harmonizedCode:
+          type: string
+          example: 5555
+        harmonizedDescription:
+          type: string
+          example: "Pure-bred breeding animals"
+        harmonizedCodeEnhancedDescription:
+          type: string
+          example: "Coal"
+        harmonizedEffectiveDate:
+          type: string
+          example: "2020-04-14T10:45:07.719"
+        harmonizedExpiryDate:
+          type: string
+          example: "2020-04-14T10:45:07.719"
+        languageIdentifier:
+          type: string
+          example: "EN"
+        createdTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"
+        updatedTimestamp:
+          type: timestamp
+          example: "2020-04-14T10:45:07.719"

@@ -1,0 +1,58 @@
+# This files contains configuration for local development
+# any modification to this file must be duplicated in the application-dev.yml file
+
+referenceDomainUrl: http://localhost:8040
+referenceDomainILBUrl: http://localhost:8040
+breURL: http://localhost:8041
+breILBUrl: http://localhost:8041
+getRules: /v1/rules
+terminalByNumber: /v1/facilities
+equipmentTypes: /v1/equipment-types
+harmonizedCodes: /v1/harmonized-codes
+harmonizedCodesByList: /v1/harmonized-codes-list
+businessConstants: /business-constants
+searchFacilityEndPoint: /v1/facilities/search
+
+
+customerDomainUrl: http://localhost:8030
+customerDomainILBUrl: http://localhost:8030
+getCustomerDetails: /v1/customer-details
+searchCustomers: /v1/customers/search
+searchOrders: /v1/orders/search
+orderDomainUrl: http://localhost:8020
+orderDomainILBUrl: http://localhost:8020
+createOrder: /v1/orders
+getOrderById: /v1/orders/{orderId}
+updateOrder: /v1/orders/{orderId}
+cancelOrder: /v1/orders/{orderId}/cancellation
+discardOrder: /v1/orders/{orderId}
+cancelPartialOrder: /v1/orders/{orderId}/order-item/{itemRequestId}/cancellation
+updateEvent: /v1/order-equipment-requests/{orderEquipmentRequestId}/status-events
+updateTransportEvent: /v1/transport-shipment-requests/{transportShipmentRequestId}/status-events
+addressHistory: /v1/orders/customers/{orderingPartyId}/locations
+
+server:
+  port: 8080
+
+# Default to the base path rather than the prepending /actuator/*
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: 'health'
+springdoc:
+  api-docs:
+    enabled: false
+
+spring:
+  sleuth:
+    sampler:
+      probability: 1.0
+  jackson:
+    default-property-inclusion: non_null
+
+  jmx:
+    unique-names: true
+  security:
+    mode: disabled

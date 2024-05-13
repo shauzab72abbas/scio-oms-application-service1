@@ -1,0 +1,55 @@
+resources:
+  repositories:
+  - repository: templates
+    type: git
+    name: ADO/pipelines-templates
+    endpoint: ADO-templates
+    ref: feature/skip-sonar-temp-fix
+    
+  
+trigger:
+  branches:
+    include:
+      - sprint/R1.0
+    exclude:
+      - "*"
+  paths:
+    exclude:
+      - azure-pipelines.yml
+      - azure-pipelines-anthos.yml
+      - terraform/*
+      
+variables:
+- group: SCIO-OMS-BACKEND-TFC-TOKEN
+ 
+pool:
+  name: CN Cloud SE
+
+extends:
+  template: multistage/platform/gcp/scio/cloud-run/springboot/template.yml@templates
+  parameters:
+    containerName: scio-oms-application
+    containerTag: 1.0.$(Build.BuildNumber)
+    destinyRepository: cn/scio
+    destinyGarRepository: scio-mr
+    sonarqube: SonarQube EE
+    securityJobTimeout: 25
+    fortify: true
+    fortifyApiSecret: '$(fortify.api.secret)'
+    fortifySprintToken: '$(fortify.sprint.token)'
+    fortifyIntegrationToken: '$(fortify.integration.token)'
+    fodVersion: 8
+    fortifySprintID: 691917
+    fortifyIntegrationID: 691919
+    APICTFeatureTestEnable: false
+    mavenVersion: 3.8.8
+    noQATEnvironment: false
+    tf_dir: $(System.DefaultWorkingDirectory)/$(appdirectoryname)/terraform
+    workspace: scio-oms-app_service
+    tf_version: 1.3.3
+    terraformFolder: 'terraform/*'
+    nonprodWorkspaceEnvs: ["dev","qat","uat"]
+    prodWorkspaceEnvs: ["prd"]
+    sonarExclusions: "**/model/*,**/util/*,**/ApplicationApplication.java,**/config/*"
+    binAuth: true
+    bdBinaryProjectVersion: 1.0.0

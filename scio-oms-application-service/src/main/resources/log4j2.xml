@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- DPB positions about logging:
+    https://kb.cn.ca/display/SPB/Java+Logging+Standard+-+BE
+    https://kb.cn.ca/display/SPB/How+to+integrate+microservice+log+with+ELK
+ -->
+<Configuration status="warn">
+    <Properties>
+        <Property name="catalina.base">.</Property>
+        <Property name="service">${bundle:bootstrap:spring.application.name}</Property>
+        <Property name="LOG_PATTERN">{"traceId" : %X{traceId} , "spanId" :%X{spanId} ,"timestamp":"$${date:MM-dd-yyyy HH:mm:ss}" ,"severity":%p , "message" : %m ,"service" : "${service}" }\n</Property>
+        <Property name="LOG_PATTERN_ERROR">{"traceId" : %X{traceId} , "spanId" :%X{spanId} , "timestamp":"$${date:MM-dd-yyyy HH:mm:ss}" ,"severity":%p , "message" : %m , "error_cause" : %throwable , "service" : "${service}"}\n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout>
+                <LevelPatternSelector defaultPattern="${LOG_PATTERN}">
+                    <PatternMatch key="WARN" pattern="${LOG_PATTERN_ERROR}" />
+                    <PatternMatch key="ERROR" pattern="${LOG_PATTERN_ERROR}" />
+                    <PatternMatch key="FATAL" pattern="${LOG_PATTERN_ERROR}" />
+                </LevelPatternSelector>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="warn">
+            <AppenderRef ref="LogToConsole"/>
+        </Root>
+        <Logger name="ca.cn.scio.application" level="info"
+                additivity="false">
+            <AppenderRef ref="LogToConsole" />
+        </Logger>
+    </Loggers>
+
+</Configuration>
